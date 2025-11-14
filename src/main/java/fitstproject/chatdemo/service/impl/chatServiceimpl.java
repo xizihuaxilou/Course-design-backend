@@ -7,11 +7,14 @@ import fitstproject.chatdemo.pojo.message;
 import fitstproject.chatdemo.service.chatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class chatServiceimpl  implements chatService {
+@Transactional
+public class chatServiceimpl implements chatService {
     @Autowired
     chatMapper chatmapper;
+
     @Override
     public Object send(message message) {
         chatmapper.send(message);
@@ -20,21 +23,21 @@ public class chatServiceimpl  implements chatService {
     }
 
     @Override
-    public Object getslist(int sendId,int receiveId) {
-        return chatmapper.getslist(sendId,receiveId);
+    public Object getslist(int sendId, int receiveId) {
+        return chatmapper.getslist(sendId, receiveId);
 
     }
 
     @Override
     public Object groupCreate(group groups) {
-        for(Integer group:groups.getMemberIds())
+        for (Integer group : groups.getMemberIds())
             chatmapper.creategroup(group, groups.getGroupName());
         return null;
     }
 
     @Override
     public Object send(groupmessage gmessage) {
-chatmapper.sendgm(gmessage);
+        chatmapper.sendgm(gmessage);
         return null;
     }
 

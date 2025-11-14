@@ -1,7 +1,10 @@
 package fitstproject.chatdemo.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fitstproject.chatdemo.pojo.message;
+import fitstproject.chatdemo.service.chatService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -20,6 +23,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private static final Map<String, WebSocketSession> ONLINE_USERS = new ConcurrentHashMap<>();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private chatService chatService;
 
     /**
      * WebSocket 连接建立后调用
@@ -93,6 +99,18 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String content = (String) msg.get("content");
 
         log.info("单聊消息: {} -> {}: {}", sendId, receiveId, content);
+
+        // 保存消息到数据库
+        try {
+            message messageEntity = new message();
+            messageEntity.setSendId(sendId);
+            messageEntity.setReceiveId(receiveId);
+            messageEntity.setContent(content);
+            chatService.send(messageEntity);
+            log.info("消息已保存到数据库");
+        } catch (Exception e) {
+            log.error("保存消息到数据库失败", e);
+        }
 
         // 构造消息对象
         Map<String, Object> messageData = Map.of(

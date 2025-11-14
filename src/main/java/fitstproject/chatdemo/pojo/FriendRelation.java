@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LogUser {
-    private String username;
-    private String password;
+public class FriendRelation {
     private Integer id;
+    private Integer userId;
+    private Integer friendId;
+    private String createdAt;
 }
