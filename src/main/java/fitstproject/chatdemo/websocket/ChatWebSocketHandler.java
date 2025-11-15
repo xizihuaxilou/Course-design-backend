@@ -137,6 +137,18 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
         log.info("群聊消息: {} -> {}: {}", sendId, groupName, content);
 
+        // 先保存消息到数据库
+        try {
+            fitstproject.chatdemo.pojo.groupmessage gmessage = new fitstproject.chatdemo.pojo.groupmessage();
+            gmessage.setSendId(sendId);
+            gmessage.setGroupName(groupName);
+            gmessage.setContent(content);
+            chatService.send(gmessage);
+            log.info("群聊消息已保存到数据库");
+        } catch (Exception e) {
+            log.error("保存群聊消息到数据库失败", e);
+        }
+
         // 构造消息对象
         Map<String, Object> messageData = Map.of(
                 "type", "group",
@@ -145,8 +157,32 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 "content", content,
                 "timestamp", System.currentTimeMillis());
 
-        // 广播给所有在线用户（实际应该只发给群成员）
-        broadcastMessage(messageData);
+        // 获取群成员列表并发送给在线的群成员(排除发送者本人)
+        try {
+            java.util.List<Integer> groupMembers = chatService.getGroupMembers(groupName);
+            log.info("群 {} 的成员列表: {}", groupName, groupMembers);
+            if (groupMembers != null) {
+                int sentCount = 0;
+                for (Integer memberId : groupMembers) {
+                    log.info("检查成员 {}, 发送者 {}, 是否相等: {}", memberId, sendId, memberId.equals(sendId));
+                    // 跳过发送者本人,因为前端已经本地添加了消息
+                    if (!memberId.equals(sendId)) {
+                        log.info("准备发送消息给成员 {}", memberId);
+                        sendToUser(String.valueOf(memberId), messageData);
+                        sentCount++;
+                    } else {
+                        log.info("跳过发送者本人 {}", memberId);
+                    }
+                }
+                log.info("群聊消息已发送给群 {} 的 {} 个成员(不包括发送者)", groupName, sentCount);
+            } else {
+                log.warn("群 {} 的成员列表为空", groupName);
+            }
+        } catch (Exception e) {
+            log.error("发送群聊消息失败", e);
+            // 降级方案:广播给所有在线用户
+            broadcastMessage(messageData);
+        }
     }
 
     /**

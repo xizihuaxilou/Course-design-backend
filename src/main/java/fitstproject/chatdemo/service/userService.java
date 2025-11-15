@@ -7,4 +7,8 @@ public interface userService {
     public LogUser login(LogUser loguser);
 
     result register(LogUser loguser);
+
+    result updateProfile(LogUser user);
+
+    LogUser getProfile(Integer id);
 }

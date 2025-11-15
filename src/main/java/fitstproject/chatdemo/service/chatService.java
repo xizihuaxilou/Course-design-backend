@@ -7,8 +7,7 @@ import fitstproject.chatdemo.pojo.message;
 public interface chatService {
     Object send(message message);
 
-
-    Object getslist(int sendId,int receiveId);
+    Object getslist(int sendId, int receiveId);
 
     Object groupCreate(group group);
 
@@ -18,5 +17,11 @@ public interface chatService {
 
     Object getslist_name(int id);
 
-    Object getlist_name(int id);
+    java.util.List<String> getlist_name(int id);
+
+    java.util.List<Integer> getGroupMembers(String groupName);
+
+    boolean checkGroupExists(String groupName);
+
+    void leaveGroup(Integer userId, String groupName);
 }

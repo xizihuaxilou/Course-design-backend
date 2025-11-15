@@ -4,6 +4,7 @@ import fitstproject.chatdemo.pojo.LogUser;
 import fitstproject.chatdemo.pojo.group;
 import fitstproject.chatdemo.pojo.groupmessage;
 import fitstproject.chatdemo.pojo.message;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -31,6 +32,24 @@ public interface chatMapper {
     @Select("select * from user where id!=#{id}")
     List<LogUser> getslist_name(int id);
 
-    @Select("select group_name from groupdata")
-    Object getlist_name(int id);
+    @Select("select distinct group_name from groupdata where member_id=#{id}")
+    List<String> getlist_name(int id);
+
+    @Select("select member_id from groupdata where group_name=#{groupName}")
+    List<Integer> getGroupMembers(String groupName);
+
+    @Select("select count(*) from groupdata where group_name=#{groupName}")
+    int checkGroupExists(String groupName);
+
+    // 更新用户个人资料
+    @org.apache.ibatis.annotations.Update("update user set real_name=#{realName}, constellation=#{constellation}, birthday=#{birthday}, interests=#{interests} where id=#{id}")
+    void updateUserProfile(LogUser user);
+
+    // 获取用户完整信息(包含个人资料)
+    @Select("select * from user where id=#{id}")
+    LogUser getUserProfile(int id);
+
+    // 退出群聊
+    @Delete("DELETE FROM groupdata WHERE member_id = #{userId} AND group_name = #{groupName}")
+    void leaveGroup(Integer userId, String groupName);
 }

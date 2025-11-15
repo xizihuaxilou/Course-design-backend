@@ -14,6 +14,9 @@ public class userServiceimpl implements userService {
     @Autowired
     userMapper usermapper;
 
+    @Autowired
+    fitstproject.chatdemo.mapper.chatMapper chatMapper;
+
     @Override
     public LogUser login(LogUser loguser) {
 
@@ -28,6 +31,21 @@ public class userServiceimpl implements userService {
         } catch (Exception e) {
             return new result("注册失败: " + e.getMessage(), "500", null);
         }
+    }
+
+    @Override
+    public result updateProfile(LogUser user) {
+        try {
+            chatMapper.updateUserProfile(user);
+            return new result("个人资料更新成功", "200", null);
+        } catch (Exception e) {
+            return new result("更新失败: " + e.getMessage(), "500", null);
+        }
+    }
+
+    @Override
+    public LogUser getProfile(Integer id) {
+        return chatMapper.getUserProfile(id);
     }
 
 }

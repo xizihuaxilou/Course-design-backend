@@ -30,4 +30,14 @@ public class User {
         return userservice.register(loguser);
     }
 
+    @PutMapping("/profile")
+    public result updateProfile(@RequestBody LogUser user) {
+        return userservice.updateProfile(user);
+    }
+
+    @GetMapping("/profile/{id}")
+    public LogUser getProfile(@PathVariable Integer id) {
+        return userservice.getProfile(id);
+    }
+
 }

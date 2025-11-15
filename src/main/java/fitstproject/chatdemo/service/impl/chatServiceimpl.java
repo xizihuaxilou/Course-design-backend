@@ -30,9 +30,20 @@ public class chatServiceimpl implements chatService {
 
     @Override
     public Object groupCreate(group groups) {
+        // 检查群名是否已存在
+        if (chatmapper.checkGroupExists(groups.getGroupName()) > 0) {
+            throw new RuntimeException("群名称已存在，请使用其他名称");
+        }
+
+        // 插入群成员记录
         for (Integer group : groups.getMemberIds())
             chatmapper.creategroup(group, groups.getGroupName());
         return null;
+    }
+
+    @Override
+    public boolean checkGroupExists(String groupName) {
+        return chatmapper.checkGroupExists(groupName) > 0;
     }
 
     @Override
@@ -52,8 +63,18 @@ public class chatServiceimpl implements chatService {
     }
 
     @Override
-    public Object getlist_name(int id) {
+    public java.util.List<String> getlist_name(int id) {
         return chatmapper.getlist_name(id);
+    }
+
+    @Override
+    public java.util.List<Integer> getGroupMembers(String groupName) {
+        return chatmapper.getGroupMembers(groupName);
+    }
+
+    @Override
+    public void leaveGroup(Integer userId, String groupName) {
+        chatmapper.leaveGroup(userId, groupName);
     }
 
 }

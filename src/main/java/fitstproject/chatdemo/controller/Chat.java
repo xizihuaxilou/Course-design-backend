@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequestMapping("/chat")
@@ -43,8 +44,14 @@ public class Chat {
     }
 
     @PostMapping("/group/create")
-    public Object groupCreate(@RequestBody group group) {
-        return chatservice.groupCreate(group);
+    public result groupCreate(@RequestBody group group) {
+        try {
+            chatservice.groupCreate(group);
+            return new result("创建群聊成功", "200", null);
+        } catch (Exception e) {
+            log.error("创建群聊失败", e);
+            return new result(e.getMessage() != null ? e.getMessage() : "创建群聊失败", "400", null);
+        }
     }
 
     @PostMapping({ "/group/send" })
@@ -111,6 +118,36 @@ public class Chat {
         } catch (Exception e) {
             log.error("删除好友失败", e);
             return new result("删除好友失败: " + e.getMessage(), "500", null);
+        }
+    }
+
+    /**
+     * 获取群成员列表
+     */
+    @GetMapping("/group/members/{groupName}")
+    public int getGroupMembers(@PathVariable String groupName) {
+        List<Integer> members = chatservice.getGroupMembers(groupName);
+        return members != null ? members.size() : 0;
+    }
+
+    /**
+     * 退出群聊
+     */
+    @DeleteMapping("/group/leave")
+    public result leaveGroup(@RequestBody Map<String, Object> params) {
+        try {
+            Integer userId = (Integer) params.get("userId");
+            String groupName = (String) params.get("groupName");
+
+            if (userId == null || groupName == null || groupName.isEmpty()) {
+                return new result("参数错误", "400", null);
+            }
+
+            chatservice.leaveGroup(userId, groupName);
+            return new result("退出群聊成功", "200", null);
+        } catch (Exception e) {
+            log.error("退出群聊失败", e);
+            return new result("退出群聊失败: " + e.getMessage(), "500", null);
         }
     }
 
